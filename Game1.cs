@@ -49,17 +49,20 @@ namespace space_inveders_clone_3d
             float totalLines = 4f;
             bool moveRight = false;
 
-            for (int i = 0; i < totalEnemies; i++)
+            for (int y = 0; y < 4; y++)
             {
                 int x = 0;
                 moveRight = !moveRight;
                 for (x = 0; x < totalColumns; x++)
                 {
-                    int line = (int)(i / totalEnemies * totalLines);
+                    float yPosition = 15.0f - (y * 5);
+                    float xPosition = x * 5.0f - 10.0f;
+
                     var enemy = new Enemy();
-                    enemy.Position = new Vector3(x * 5.0f - 10.0f, 15.0f - (line * 5), 2.0f);
+                    enemy.Position = new Vector3(xPosition, yPosition, 2.0f);
                     enemy.StartPosition = new Vector3(enemy.Position.X, enemy.Position.Y, enemy.Position.X);
                     enemy.MoveRight = moveRight;
+
                     this.Enemies.Add(enemy);
                 }
             }
