@@ -1,8 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using space_inveders_clone_3d.entities;
+using space_inveders_clone_3d.Entities;
 
 namespace space_inveders_clone_3d
 {
@@ -14,6 +15,10 @@ namespace space_inveders_clone_3d
         public SpriteBatch spriteBatch;
 
         public Player Player;
+        public List<Enemy> Enemies = new List<Enemy>();
+
+        public enum Status { PLAYING, GAMEOVER, WIN };
+        public Status CurrentStatus = Status.PLAYING;
 
         public Game1()
         {
@@ -35,6 +40,26 @@ namespace space_inveders_clone_3d
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             this.Player = new Player();
+
+            float totalEnemies = 20f;
+            float totalColumns = 5f;
+            float totalLines = 4f;
+            bool moveRight = false;
+
+            for (int i = 0; i < totalEnemies; i++)
+            {
+                int x = 0;
+                moveRight = !moveRight;
+                for (x = 0; x < totalColumns; x++)
+                {
+                    int line = (int)(i / totalEnemies * totalLines);
+                    var enemy = new Enemy();
+                    enemy.Position = new Vector3(x * 5.0f - 10.0f, 15.0f - (line * 5), 2.0f);
+                    enemy.StartPosition = new Vector3(enemy.Position.X, enemy.Position.Y, enemy.Position.X);
+                    enemy.MoveRight = moveRight;
+                    this.Enemies.Add(enemy);
+                }
+            }
         }
 
         protected override void Update(GameTime gameTime)
@@ -64,11 +89,20 @@ namespace space_inveders_clone_3d
             Matrix view = Matrix.CreateLookAt(cameraPosition, cameraTarget, Vector3.Up);
             Matrix projection = Matrix.CreatePerspectiveFieldOfView(fovAngle, 800f / 480f, near, far);
 
-            if (this.Player != null)
-            {
-                DrawModel(this.Player.Ship, this.Player.World, view, projection);
-            }
+            DrawModel(this.Player.Ship, this.Player.World, view, projection);
 
+            foreach (Enemy enemy in this.Enemies)
+            {
+                enemy.Update(gameTime);
+                DrawModel(enemy.Model, enemy.World, view, projection);
+            }
+            /* 
+            System.Console.Clear();
+            if (IsCollision(this.Player.Ship, this.Player.World, this.Enemy.Model, this.Enemy.World))
+                System.Console.WriteLine("Ok");
+            else
+                System.Console.WriteLine("not ok");
+            */
             base.Draw(gameTime);
         }
 
@@ -87,5 +121,26 @@ namespace space_inveders_clone_3d
                 mesh.Draw();
             }
         }
+
+        // code from http://rbwhitaker.wikidot.com/collision-detection
+        private bool IsCollision(Model model1, Matrix world1, Model model2, Matrix world2)
+        {
+            for (int meshIndex1 = 0; meshIndex1 < model1.Meshes.Count; meshIndex1++)
+            {
+                BoundingSphere sphere1 = model1.Meshes[meshIndex1].BoundingSphere;
+                sphere1 = sphere1.Transform(world1);
+
+                for (int meshIndex2 = 0; meshIndex2 < model2.Meshes.Count; meshIndex2++)
+                {
+                    BoundingSphere sphere2 = model2.Meshes[meshIndex2].BoundingSphere;
+                    sphere2 = sphere2.Transform(world2);
+
+                    if (sphere1.Intersects(sphere2))
+                        return true;
+                }
+            }
+            return false;
+        }
     }
+
 }

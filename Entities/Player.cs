@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace space_inveders_clone_3d.entities
+namespace space_inveders_clone_3d.Entities
 {
     public class Player
     {
@@ -41,10 +41,12 @@ namespace space_inveders_clone_3d.entities
         private float _speed = 200f / 10000;
         private void Move(GameTime gameTime)
         {
+            float totalMilliseconds = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+
             if (_cRight)
-                this.Position.X += _speed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                this.Position.X += _speed * totalMilliseconds;
             if (_cLeft)
-                this.Position.X -= _speed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                this.Position.X -= _speed * totalMilliseconds;
 
             this.World = Matrix.CreateTranslation(this.Position);
         }
