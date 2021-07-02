@@ -15,7 +15,9 @@ namespace space_inveders_clone_3d
         public SpriteBatch spriteBatch;
 
         public Player Player;
+        public Weapon Weapon;
         public List<Enemy> Enemies = new List<Enemy>();
+        public List<Bullet> Bullets = new List<Bullet>();
 
         public enum Status { PLAYING, GAMEOVER, WIN };
         public Status CurrentStatus = Status.PLAYING;
@@ -40,6 +42,7 @@ namespace space_inveders_clone_3d
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             this.Player = new Player();
+            this.Weapon = new Weapon();
 
             float totalEnemies = 20f;
             float totalColumns = 5f;
@@ -67,8 +70,11 @@ namespace space_inveders_clone_3d
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (this.Player != null)
-                this.Player.Update(gameTime);
+            this.Player.Update(gameTime);
+            this.Weapon.Update(gameTime);
+
+            foreach (Bullet bullet in this.Bullets)
+                bullet.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -93,16 +99,23 @@ namespace space_inveders_clone_3d
 
             foreach (Enemy enemy in this.Enemies)
             {
-                enemy.Update(gameTime);
-                DrawModel(enemy.Model, enemy.World, view, projection);
+                if (enemy.Ilive)
+                {
+                    enemy.Update(gameTime);
+                    DrawModel(enemy.Model, enemy.World, view, projection);
+                    if (IsCollision(this.Player.Ship, this.Player.World, enemy.Model, enemy.World))
+                        this.CurrentStatus = Status.GAMEOVER;
+
+                    foreach (Bullet bullet in this.Bullets)
+                        if (IsCollision(enemy.Model, enemy.World, bullet.Model, bullet.World))
+                            enemy.Ilive = false;
+                }
             }
-            /* 
-            System.Console.Clear();
-            if (IsCollision(this.Player.Ship, this.Player.World, this.Enemy.Model, this.Enemy.World))
-                System.Console.WriteLine("Ok");
-            else
-                System.Console.WriteLine("not ok");
-            */
+
+            foreach (Bullet bullet in this.Bullets)
+                DrawModel(bullet.Model, bullet.World, view, projection);
+
+
             base.Draw(gameTime);
         }
 
