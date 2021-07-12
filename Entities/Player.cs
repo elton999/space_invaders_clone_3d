@@ -9,6 +9,7 @@ namespace space_inveders_clone_3d.Entities
         public Model Ship;
         public Matrix World;
         public Vector3 Position;
+
         public Player()
         {
             this.Ship = Game1.Instance.Content.Load<Model>("player");

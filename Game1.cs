@@ -22,6 +22,8 @@ namespace space_inveders_clone_3d
         public enum Status { PLAYING, GAMEOVER, WIN };
         public Status CurrentStatus = Status.PLAYING;
 
+        private Effect Effect;
+
         public Game1()
         {
             if (Instance == null)
@@ -40,6 +42,7 @@ namespace space_inveders_clone_3d
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            this.Effect = Content.Load<Effect>("effect");
 
             this.Player = new Player();
             this.Weapon = new Weapon();
@@ -84,7 +87,7 @@ namespace space_inveders_clone_3d
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.AliceBlue);
 
             Vector3 cameraPosition = new Vector3(0.0f, 0.0f, 50.0f);
             Vector3 cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
@@ -126,13 +129,29 @@ namespace space_inveders_clone_3d
         {
             foreach (ModelMesh mesh in model.Meshes)
             {
-                foreach (BasicEffect effect in mesh.Effects)
+                /*foreach (BasicEffect effect in mesh.Effects)
                 {
                     effect.World = world;
                     effect.View = view;
                     effect.Projection = projection;
 
                     effect.EnableDefaultLighting();
+                }*/
+                foreach (ModelMeshPart meshPart in mesh.MeshParts)
+                {
+                    meshPart.Effect = this.Effect;
+
+                    this.Effect.Parameters["World"].SetValue(world);
+                    this.Effect.Parameters["View"].SetValue(view);
+                    this.Effect.Parameters["Projection"].SetValue(projection);
+
+                    Matrix worldInverseTransposeMatrix = Matrix.Transpose(Matrix.Invert(mesh.ParentBone.Transform * world));
+                    this.Effect.Parameters["WorldInverseTranspose"].SetValue(worldInverseTransposeMatrix);
+                    this.Effect.Parameters["AmbientColor"].SetValue(Color.Red.ToVector4());
+                    this.Effect.Parameters["AmbientIntensity"].SetValue(0.5f);
+                    this.Effect.Parameters["DiffuseIntensity"].SetValue(0.5f);
+                    this.Effect.Parameters["DiffuseLightDirection"].SetValue(new Vector3(82.0f, 12.0f, -100.0f));
+                    this.Effect.Parameters["DiffuseColor"].SetValue(new Vector4(1, 1, 1, 1));
                 }
                 mesh.Draw();
             }
