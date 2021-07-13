@@ -14,6 +14,7 @@ namespace space_inveders_clone_3d
         private GraphicsDeviceManager _graphics;
         public SpriteBatch spriteBatch;
 
+        public UI UI;
         public Player Player;
         public Weapon Weapon;
         public List<Enemy> Enemies = new List<Enemy>();
@@ -23,8 +24,6 @@ namespace space_inveders_clone_3d
         public Status CurrentStatus = Status.START;
 
         private Effect Effect;
-        private Effect SpriteEffect;
-        private SpriteFont Font;
 
         public Game1()
         {
@@ -45,10 +44,8 @@ namespace space_inveders_clone_3d
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             this.Effect = Content.Load<Effect>("effect");
-            this.SpriteEffect = Content.Load<Effect>("SpriteWave");
-            this.Font = Content.Load<SpriteFont>("font");
 
-            this._BackBuffer = new RenderTarget2D(_graphics.GraphicsDevice, 1500, 1000);
+            this.UI = new UI(GraphicsDevice);
 
             this.Player = new Player();
             this.Weapon = new Weapon();
@@ -99,23 +96,9 @@ namespace space_inveders_clone_3d
             base.Update(gameTime);
         }
 
-        private RenderTarget2D _BackBuffer;
-        private void DrawTexts()
-        {
-            _graphics.GraphicsDevice.SetRenderTarget(this._BackBuffer);
-            GraphicsDevice.Clear(Color.Transparent);
-            spriteBatch.Begin();
-            if (CurrentStatus == Status.START)
-                spriteBatch.DrawString(this.Font, "Press Any Key To Start", new Vector2(450, 400), Color.White);
-            if (CurrentStatus == Status.GAMEOVER)
-                spriteBatch.DrawString(this.Font, "Game Over", new Vector2(570, 200), Color.White);
-            spriteBatch.End();
-            _graphics.GraphicsDevice.SetRenderTarget(null);
-        }
-
         protected override void Draw(GameTime gameTime)
         {
-            this.DrawTexts();
+            this.UI.DrawTexts(spriteBatch, GraphicsDevice);
 
             GraphicsDevice.Clear(Color.Black);
 
@@ -132,6 +115,17 @@ namespace space_inveders_clone_3d
 
             this.Player.DrawModel(view, projection);
 
+            this.DrawEnemies(gameTime, view, projection);
+
+            this.DrawBullets(gameTime, view, projection);
+
+            this.UI.Draw(gameTime, spriteBatch, GraphicsDevice);
+
+            base.Draw(gameTime);
+        }
+
+        private void DrawEnemies(GameTime gameTime, Matrix view, Matrix projection)
+        {
             foreach (Enemy enemy in this.Enemies)
             {
                 if (enemy.Ilive)
@@ -146,20 +140,13 @@ namespace space_inveders_clone_3d
                             enemy.Ilive = false;
                 }
             }
+        }
 
+        private void DrawBullets(GameTime gameTime, Matrix view, Matrix projection)
+        {
             foreach (Bullet bullet in this.Bullets)
                 bullet.DrawModel(view, projection);
-
-            amount = (float)gameTime.TotalGameTime.TotalSeconds * 10;
-            this.SpriteEffect.Parameters["amount"].SetValue(amount);
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, this.SpriteEffect, null);
-            spriteBatch.Draw((Texture2D)this._BackBuffer, new Vector2(0, 0), Color.White);
-            spriteBatch.End();
-
-
-            base.Draw(gameTime);
         }
-        float amount = 0;
     }
 
 }

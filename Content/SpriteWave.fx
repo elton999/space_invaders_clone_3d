@@ -28,7 +28,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float w = 10.0f;
     float coorY = sin( w*input.TextureCoordinates.x + amount) * A; 
 	coorY = coorY + input.TextureCoordinates.y;
-
+	//input.TextureCoordinates.x += ((0.5f -input.TextureCoordinates.x) * 0.5f);
 	float4 color = tex2D(SpriteTextureSampler, float2(input.TextureCoordinates.x, coorY)) * input.Color;
 	
 	return color;
