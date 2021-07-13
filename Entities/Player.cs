@@ -1,27 +1,26 @@
+using System.Drawing;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace space_inveders_clone_3d.Entities
 {
-    public class Player
+    public class Player : Entity
     {
-        public Model Ship;
-        public Matrix World;
-        public Vector3 Position;
-
         public Player()
         {
-            this.Ship = Game1.Instance.Content.Load<Model>("player");
+            this.Model = Game1.Instance.Content.Load<Model>("player");
             this.Position = new Vector3(0f, -12.0f, 2.0f);
             this.World = Matrix.CreateTranslation(this.Position);
+            this.Color = new Vector4(1, 1, 1, 1);
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             this.Input();
             this.Move(gameTime);
             this.Animation(gameTime);
+            base.Update(gameTime);
         }
 
         private bool _cRight = false;
@@ -48,8 +47,6 @@ namespace space_inveders_clone_3d.Entities
                 this.Position.X += _speed * totalMilliseconds;
             if (_cLeft)
                 this.Position.X -= _speed * totalMilliseconds;
-
-            this.World = Matrix.CreateTranslation(this.Position);
         }
 
         private float _maxRotationX = 0.5f;
@@ -64,8 +61,6 @@ namespace space_inveders_clone_3d.Entities
 
             if (!this._cLeft && !this._cRight && Rotation != 0)
                 Rotation = Rotation > 0 ? Rotation - 0.03f : Rotation + 0.03f;
-
-            this.World = Matrix.CreateRotationY(Rotation) * this.World;
         }
     }
 }

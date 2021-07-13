@@ -130,25 +130,25 @@ namespace space_inveders_clone_3d
             Matrix view = Matrix.CreateLookAt(cameraPosition, cameraTarget, Vector3.Up);
             Matrix projection = Matrix.CreatePerspectiveFieldOfView(fovAngle, 800f / 480f, near, far);
 
-            DrawModel(this.Player.Ship, this.Player.World, view, projection);
+            this.Player.DrawModel(view, projection);
 
             foreach (Enemy enemy in this.Enemies)
             {
                 if (enemy.Ilive)
                 {
                     enemy.Update(gameTime);
-                    DrawModel(enemy.Model, enemy.World, view, projection);
-                    if (IsCollision(this.Player.Ship, this.Player.World, enemy.Model, enemy.World))
+                    enemy.DrawModel(view, projection);
+                    if (enemy.IsCollision(this.Player.Model, this.Player.World))
                         this.CurrentStatus = Status.GAMEOVER;
 
                     foreach (Bullet bullet in this.Bullets)
-                        if (IsCollision(enemy.Model, enemy.World, bullet.Model, bullet.World))
+                        if (bullet.IsCollision(enemy.Model, enemy.World))
                             enemy.Ilive = false;
                 }
             }
 
             foreach (Bullet bullet in this.Bullets)
-                DrawModel(bullet.Model, bullet.World, view, projection);
+                bullet.DrawModel(view, projection);
 
             amount = (float)gameTime.TotalGameTime.TotalSeconds * 10;
             this.SpriteEffect.Parameters["amount"].SetValue(amount);
@@ -160,57 +160,6 @@ namespace space_inveders_clone_3d
             base.Draw(gameTime);
         }
         float amount = 0;
-
-        private void DrawModel(Model model, Matrix world, Matrix view, Matrix projection)
-        {
-            foreach (ModelMesh mesh in model.Meshes)
-            {
-                /*foreach (BasicEffect effect in mesh.Effects)
-                {
-                    effect.World = world;
-                    effect.View = view;
-                    effect.Projection = projection;
-
-                    effect.EnableDefaultLighting();
-                }*/
-                foreach (ModelMeshPart meshPart in mesh.MeshParts)
-                {
-                    meshPart.Effect = this.Effect;
-
-                    this.Effect.Parameters["World"].SetValue(world);
-                    this.Effect.Parameters["View"].SetValue(view);
-                    this.Effect.Parameters["Projection"].SetValue(projection);
-
-                    Matrix worldInverseTransposeMatrix = Matrix.Transpose(Matrix.Invert(mesh.ParentBone.Transform * world));
-                    this.Effect.Parameters["WorldInverseTranspose"].SetValue(worldInverseTransposeMatrix);
-                    this.Effect.Parameters["AmbientColor"].SetValue(Color.Red.ToVector4());
-                    this.Effect.Parameters["AmbientIntensity"].SetValue(0.6f);
-                    this.Effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
-                    this.Effect.Parameters["DiffuseLightDirection"].SetValue(new Vector3(82.0f, 12.0f, -100.0f));
-                }
-                mesh.Draw();
-            }
-        }
-
-        // code from http://rbwhitaker.wikidot.com/collision-detection
-        private bool IsCollision(Model model1, Matrix world1, Model model2, Matrix world2)
-        {
-            for (int meshIndex1 = 0; meshIndex1 < model1.Meshes.Count; meshIndex1++)
-            {
-                BoundingSphere sphere1 = model1.Meshes[meshIndex1].BoundingSphere;
-                sphere1 = sphere1.Transform(world1);
-
-                for (int meshIndex2 = 0; meshIndex2 < model2.Meshes.Count; meshIndex2++)
-                {
-                    BoundingSphere sphere2 = model2.Meshes[meshIndex2].BoundingSphere;
-                    sphere2 = sphere2.Transform(world2);
-
-                    if (sphere1.Intersects(sphere2))
-                        return true;
-                }
-            }
-            return false;
-        }
     }
 
 }

@@ -5,20 +5,18 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace space_inveders_clone_3d.Entities
 {
-    public class Bullet
+    public class Bullet : Entity
     {
-        public Matrix World;
-        public Vector3 Position;
-        public Model Model;
         public Bullet()
         {
             this.Model = Game1.Instance.Content.Load<Model>("bullet");
+            this.Color = new Vector4(1, 1, 0, 1);
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             this.Position.Y += 0.5f;
-            this.World = Matrix.CreateTranslation(this.Position);
+            base.Update(gameTime);
         }
     }
 }
