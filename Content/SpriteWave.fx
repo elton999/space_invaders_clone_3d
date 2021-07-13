@@ -8,6 +8,7 @@
 #endif
 
 Texture2D SpriteTexture;
+float amount;
 
 sampler2D SpriteTextureSampler = sampler_state
 {
@@ -22,13 +23,20 @@ struct VertexShaderOutput
 };
 
 float4 MainPS(VertexShaderOutput input) : COLOR
-{
-	return tex2D(SpriteTextureSampler,input.TextureCoordinates) * input.Color;
+{ 	
+    float A = 0.01f;
+    float w = 10.0f;
+    float coorY = sin( w*input.TextureCoordinates.x + amount) * A; 
+	coorY = coorY + input.TextureCoordinates.y;
+
+	float4 color = tex2D(SpriteTextureSampler, float2(input.TextureCoordinates.x, coorY)) * input.Color;
+	
+	return color;
 }
 
 technique SpriteDrawing
 {
-	pass P0
+	pass Pass1
 	{
 		PixelShader = compile PS_SHADERMODEL MainPS();
 	}

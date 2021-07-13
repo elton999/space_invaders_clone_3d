@@ -58,6 +58,13 @@
 /processorParam:TextureFormat=Compressed
 /build:enemy.fbx
 
+#begin font.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:font.spritefont
+
 #begin player.fbx
 /importer:FbxImporter
 /processor:ModelProcessor
@@ -77,9 +84,12 @@
 /processorParam:TextureFormat=Compressed
 /build:player.fbx
 
-#begin sprite_effect.fx
+#begin Quicksand-Bold.ttf
+/copy:Quicksand-Bold.ttf
+
+#begin SpriteWave.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:sprite_effect.fx
+/build:SpriteWave.fx
 

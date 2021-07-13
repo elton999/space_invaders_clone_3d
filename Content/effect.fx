@@ -17,7 +17,6 @@ float AmbientIntensity = 0.1;
 matrix WorldInverseTranspose;
 
 float3 DiffuseLightDirection = float3(1, 0, 0);
-float4 DiffuseColor = float4(1, 1, 1, 1);
 float DiffuseIntensity = 1.0;
 
 struct VertexShaderInput
@@ -36,8 +35,6 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 {
 	VertexShaderOutput output;
 
-	//output.Normal = mul(input.Normal, World);
-
 	float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
     float4 pos = mul(viewPosition, Projection);
@@ -46,19 +43,20 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
     float4 normal = mul(input.Normal, WorldInverseTranspose);
     float lightIntensity = dot(normal, DiffuseLightDirection);
-    output.Color = saturate(DiffuseColor * DiffuseIntensity * lightIntensity);
+    output.Color = AmbientColor * lightIntensity * DiffuseIntensity;
 
 	return output;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {	
-	return saturate(input.Color + AmbientColor * AmbientIntensity);
+	float4 ambient = AmbientColor * AmbientIntensity;
+	return AmbientColor * (ambient + input.Color);
 }
 
 technique BasicColorDrawing
 {
-	pass Pass0
+	pass P0
 	{
 		VertexShader = compile VS_SHADERMODEL MainVS();
 		PixelShader = compile PS_SHADERMODEL MainPS();

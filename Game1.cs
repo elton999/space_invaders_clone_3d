@@ -19,10 +19,12 @@ namespace space_inveders_clone_3d
         public List<Enemy> Enemies = new List<Enemy>();
         public List<Bullet> Bullets = new List<Bullet>();
 
-        public enum Status { PLAYING, GAMEOVER, WIN };
-        public Status CurrentStatus = Status.PLAYING;
+        public enum Status { START, PLAYING, GAMEOVER, WIN };
+        public Status CurrentStatus = Status.START;
 
         private Effect Effect;
+        private Effect SpriteEffect;
+        private SpriteFont Font;
 
         public Game1()
         {
@@ -43,13 +45,18 @@ namespace space_inveders_clone_3d
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             this.Effect = Content.Load<Effect>("effect");
+            this.SpriteEffect = Content.Load<Effect>("SpriteWave");
+            this.Font = Content.Load<SpriteFont>("font");
+
+            this._BackBuffer = new RenderTarget2D(_graphics.GraphicsDevice, 1500, 1000);
 
             this.Player = new Player();
             this.Weapon = new Weapon();
+        }
 
-            float totalEnemies = 20f;
+        private void CreateEnemies()
+        {
             float totalColumns = 5f;
-            float totalLines = 4f;
             bool moveRight = false;
 
             for (int y = 0; y < 4; y++)
@@ -73,8 +80,15 @@ namespace space_inveders_clone_3d
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            if (Keyboard.GetState().GetPressedKeys().Length > 0 && CurrentStatus != Status.PLAYING)
+            {
+                this.CurrentStatus = Status.PLAYING;
+                this.Bullets = new List<Bullet>();
+                this.CreateEnemies();
+            }
 
             this.Player.Update(gameTime);
             this.Weapon.Update(gameTime);
@@ -85,9 +99,25 @@ namespace space_inveders_clone_3d
             base.Update(gameTime);
         }
 
+        private RenderTarget2D _BackBuffer;
+        private void DrawTexts()
+        {
+            _graphics.GraphicsDevice.SetRenderTarget(this._BackBuffer);
+            GraphicsDevice.Clear(Color.Transparent);
+            spriteBatch.Begin();
+            if (CurrentStatus == Status.START)
+                spriteBatch.DrawString(this.Font, "Press Any Key To Start", new Vector2(450, 400), Color.White);
+            if (CurrentStatus == Status.GAMEOVER)
+                spriteBatch.DrawString(this.Font, "Game Over", new Vector2(570, 200), Color.White);
+            spriteBatch.End();
+            _graphics.GraphicsDevice.SetRenderTarget(null);
+        }
+
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.AliceBlue);
+            this.DrawTexts();
+
+            GraphicsDevice.Clear(Color.Black);
 
             Vector3 cameraPosition = new Vector3(0.0f, 0.0f, 50.0f);
             Vector3 cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
@@ -97,7 +127,6 @@ namespace space_inveders_clone_3d
             float near = 0.01f;
             float far = 100f;
 
-            //Matrix world = Matrix.CreateTranslation(new Vector3(0, 10.0f, 0));
             Matrix view = Matrix.CreateLookAt(cameraPosition, cameraTarget, Vector3.Up);
             Matrix projection = Matrix.CreatePerspectiveFieldOfView(fovAngle, 800f / 480f, near, far);
 
@@ -121,9 +150,16 @@ namespace space_inveders_clone_3d
             foreach (Bullet bullet in this.Bullets)
                 DrawModel(bullet.Model, bullet.World, view, projection);
 
+            amount = (float)gameTime.TotalGameTime.TotalSeconds * 10;
+            this.SpriteEffect.Parameters["amount"].SetValue(amount);
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, this.SpriteEffect, null);
+            spriteBatch.Draw((Texture2D)this._BackBuffer, new Vector2(0, 0), Color.White);
+            spriteBatch.End();
+
 
             base.Draw(gameTime);
         }
+        float amount = 0;
 
         private void DrawModel(Model model, Matrix world, Matrix view, Matrix projection)
         {
@@ -148,10 +184,9 @@ namespace space_inveders_clone_3d
                     Matrix worldInverseTransposeMatrix = Matrix.Transpose(Matrix.Invert(mesh.ParentBone.Transform * world));
                     this.Effect.Parameters["WorldInverseTranspose"].SetValue(worldInverseTransposeMatrix);
                     this.Effect.Parameters["AmbientColor"].SetValue(Color.Red.ToVector4());
-                    this.Effect.Parameters["AmbientIntensity"].SetValue(0.5f);
-                    this.Effect.Parameters["DiffuseIntensity"].SetValue(0.5f);
+                    this.Effect.Parameters["AmbientIntensity"].SetValue(0.6f);
+                    this.Effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
                     this.Effect.Parameters["DiffuseLightDirection"].SetValue(new Vector3(82.0f, 12.0f, -100.0f));
-                    this.Effect.Parameters["DiffuseColor"].SetValue(new Vector4(1, 1, 1, 1));
                 }
                 mesh.Draw();
             }

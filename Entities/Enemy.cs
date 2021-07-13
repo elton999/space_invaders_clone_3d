@@ -28,8 +28,9 @@ namespace space_inveders_clone_3d.Entities
                 float totalMilliseconds = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
                 this.Position.Y -= totalMilliseconds * _speedY;
                 this.Position.X = this.StartPosition.X + (float)Math.Sin(gameTime.TotalGameTime.TotalMilliseconds * (MoveRight ? _speedX : -_speedX)) * 10.0f;
-                this.World = Matrix.CreateTranslation(this.Position);
+
             }
+            this.World = Matrix.CreateTranslation(this.Position);
         }
     }
 }
